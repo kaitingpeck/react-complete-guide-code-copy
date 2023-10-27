@@ -1,42 +1,40 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from "react";
 
-import Card from '../UI/Card';
-import Button from '../UI/Button';
-import ErrorModal from '../UI/ErrorModal';
-import classes from './AddUser.module.css';
+import Card from "../UI/Card";
+import Button from "../UI/Button";
+import ErrorModal from "../UI/ErrorModal";
+import classes from "./AddUser.module.css";
+import Wrapper from "../Helper/Wrapper";
 
 const AddUser = (props) => {
-  const [enteredUsername, setEnteredUsername] = useState('');
-  const [enteredAge, setEnteredAge] = useState('');
+  const nameInputRef = useRef(); // object with current field - the object stores the real DOM node that can be manipulated
+  const ageInputRef = useRef();
+
   const [error, setError] = useState();
 
   const addUserHandler = (event) => {
     event.preventDefault();
-    if (enteredUsername.trim().length === 0 || enteredAge.trim().length === 0) {
+    const enteredName = nameInputRef.current.value;
+    const enteredUserAge = ageInputRef.current.value;
+    if (enteredName.trim().length === 0 || enteredUserAge.trim().length === 0) {
       setError({
-        title: 'Invalid input',
-        message: 'Please enter a valid name and age (non-empty values).',
+        title: "Invalid input",
+        message: "Please enter a valid name and age (non-empty values).",
       });
       return;
     }
-    if (+enteredAge < 1) {
+    if (+enteredUserAge < 1) {
       setError({
-        title: 'Invalid age',
-        message: 'Please enter a valid age (> 0).',
+        title: "Invalid age",
+        message: "Please enter a valid age (> 0).",
       });
       return;
     }
-    props.onAddUser(enteredUsername, enteredAge);
-    setEnteredUsername('');
-    setEnteredAge('');
-  };
+    props.onAddUser(enteredName, enteredUserAge);
 
-  const usernameChangeHandler = (event) => {
-    setEnteredUsername(event.target.value);
-  };
-
-  const ageChangeHandler = (event) => {
-    setEnteredAge(event.target.value);
+    // rarely, we use refs to manipulate the DOM
+    nameInputRef.current.value = ""; // DOM API
+    ageInputRef.current.value = "";
   };
 
   const errorHandler = () => {
@@ -44,7 +42,7 @@ const AddUser = (props) => {
   };
 
   return (
-    <div>
+    <Wrapper>
       {error && (
         <ErrorModal
           title={error.title}
@@ -55,23 +53,13 @@ const AddUser = (props) => {
       <Card className={classes.input}>
         <form onSubmit={addUserHandler}>
           <label htmlFor="username">Username</label>
-          <input
-            id="username"
-            type="text"
-            value={enteredUsername}
-            onChange={usernameChangeHandler}
-          />
+          <input id="username" type="text" ref={nameInputRef} />
           <label htmlFor="age">Age (Years)</label>
-          <input
-            id="age"
-            type="number"
-            value={enteredAge}
-            onChange={ageChangeHandler}
-          />
+          <input id="age" type="number" ref={ageInputRef} />
           <Button type="submit">Add User</Button>
         </form>
       </Card>
-    </div>
+    </Wrapper>
   );
 };
 
